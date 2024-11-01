@@ -1,9 +1,10 @@
 import requests
 from typing import List, Dict, Optional
 from src.utils import config
+import json
 
 class NewsFetcher:
-    def __init__(self, api_key: str = config.KEYS['NEWS_API_KEY']):
+    def __init__(self, api_key: str = ""):
         """
         Initializes the NewsFetcher with the provided API key.
         
@@ -39,6 +40,10 @@ class NewsFetcher:
             response = requests.get(self.base_url, params=params)
             response.raise_for_status()  # Raises an error for bad HTTP status codes
             articles = response.json().get("articles", [])
+            
+            with open('data.json', 'w') as f:
+                json.dump(articles, f)
+
             return [
                 {
                     "title": article.get("title"),
@@ -54,3 +59,7 @@ class NewsFetcher:
         except requests.RequestException as e:
             print(f"Error fetching articles: {e}")
             return []
+
+fetcher = NewsFetcher(api_key=config.KEYS['NEWS_API_KEY'])
+articles = fetcher.fetch_articles(query="bitcoin", from_date="2024-10-01")
+print(articles)
